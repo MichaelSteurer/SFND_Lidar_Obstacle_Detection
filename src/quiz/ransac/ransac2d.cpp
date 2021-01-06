@@ -65,20 +65,54 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 {
 	std::unordered_set<int> inliersResult;
 	srand(time(NULL));
-	
-	// TODO: Fill in this function
 
-	// For max iterations 
+    std::unordered_set<int> indexInlinersGlobal;
 
-	// Randomly sample subset and fit line
+	for(int iteration=0; iteration < maxIterations; iteration++) 
+	{
+		// define start and end of a random line
+		int randomIndexStart = rand() % cloud->size();
+		pcl::PointXYZ randomLineStart = cloud->points[randomIndexStart];
 
-	// Measure distance between every point and fitted line
-	// If distance is smaller than threshold count it as inlier
+		int randomIndexEnd;
+		do {
+			randomIndexEnd = rand() % cloud->size();
+		} 
+		while(randomIndexEnd == randomIndexStart);
 
-	// Return indicies of inliers from fitted line with most inliers
-	
-	return inliersResult;
+		pcl::PointXYZ randomLineEnd = cloud->points[randomIndexEnd];
+		
+		// calculate A, B and C according to the equation Ax + By + C = 0
+		float a = randomLineStart.y - randomLineEnd.y;
+		float b = randomLineEnd.x - randomLineStart.x;
+		float c = randomLineStart.x * randomLineEnd.y - randomLineEnd.x * randomLineStart.y;
 
+		// iterate through points, check if distance is within the threshold, i.e. it is an inlier.
+		// if the number of inliers is larger than the current max -> set as new optimum.
+	    std::unordered_set<int> indexInliersIterationStep;
+		for(int i = 0; i < cloud->size(); i++)
+		{
+			// compute distance
+			// taken from https://brilliant.org/wiki/dot-product-distance-between-point-and-a-line/
+			pcl::PointXYZ cloudPoint = cloud->points[i];
+			float d = abs(a * cloudPoint.x + b * cloudPoint.y + c) / sqrt(pow(a, 2) + pow(b, 2));
+
+			// keep index if distance is less than threshold; adds start and end of line too.
+			if(d < distanceTol)
+			{ 
+				indexInliersIterationStep.insert(i);
+			}
+		}
+
+		// number of indexes is larger then current optimum -> store in global variable
+		if(indexInliersIterationStep.size() > indexInlinersGlobal.size())
+		{
+			indexInlinersGlobal = indexInliersIterationStep;
+		}
+	}
+
+	// return global optimum
+	return indexInlinersGlobal;
 }
 
 int main ()
@@ -92,7 +126,7 @@ int main ()
 	
 
 	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = Ransac(cloud, 0, 0);
+	std::unordered_set<int> inliers = Ransac(cloud, 50, 0.5);
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
@@ -105,7 +139,6 @@ int main ()
 		else
 			cloudOutliers->points.push_back(point);
 	}
-
 
 	// Render 2D point cloud with inliers and outliers
 	if(inliers.size())
