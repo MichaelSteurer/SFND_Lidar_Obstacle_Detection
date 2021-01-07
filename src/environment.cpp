@@ -55,7 +55,18 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     
     std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> result;
 
-    result = processPointClouds->SegmentPlane(cloud, 1000, 0.2);
+	int selector = 1;
+	switch(selector) 
+	{
+	case 0:
+        result = processPointClouds->SegmentPlane(cloud, 1000, 0.2);
+		break;
+	case 1:
+        result = processPointClouds->SegmentPlaneCustom(cloud, 1000, 0.2);
+		break;
+	default:
+		return;
+	}
     
     renderPointCloud(viewer, result.first, "first", Color(0, 255, 0));
     renderPointCloud(viewer, result.second, "second", Color(255, 0, 0));
