@@ -61,6 +61,72 @@ pcl::visualization::PCLVisualizer::Ptr initScene()
   	return viewer;
 }
 
+std::unordered_set<int> Ransac3D(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
+{
+	std::unordered_set<int> inliersResult;
+	srand(time(NULL));
+
+    std::unordered_set<int> indexInlinersGlobal;
+
+	for(int iteration=0; iteration < maxIterations; iteration++) 
+	{
+		// define three random distinct points in the cloud
+
+		// first
+		int randomIndexOne = rand() % cloud->size();
+		pcl::PointXYZ randomPointOne = cloud->points[randomIndexOne];
+
+		// second
+		int randomIndexTwo;
+		do {
+			randomIndexTwo = rand() % cloud->size();
+		} 
+		while(randomIndexTwo == randomIndexOne);
+
+		pcl::PointXYZ randomPointTwo = cloud->points[randomIndexTwo];
+
+		// third
+		int randomIndexThree;
+		do {
+			randomIndexThree = rand() % cloud->size();
+		} 
+		while(randomIndexThree == randomIndexOne || randomIndexThree == randomIndexTwo);
+
+		pcl::PointXYZ randomPointThree = cloud->points[randomIndexThree];
+
+		// calculate A, B, C and D according to the equation Ax + By + Cz + D = 0
+		float a = (randomPointTwo.y - randomPointOne.y) * (randomPointThree.z - randomPointOne.y) - (randomPointTwo.z - randomPointOne.z) * (randomPointThree.y - randomPointOne.y);
+		float b = (randomPointTwo.z - randomPointOne.z) * (randomPointThree.x - randomPointOne.x) - (randomPointTwo.x - randomPointOne.x) * (randomPointThree.z - randomPointOne.z);
+		float c = (randomPointTwo.x - randomPointOne.x) * (randomPointThree.y - randomPointOne.y) - (randomPointTwo.y - randomPointOne.y) * (randomPointThree.x - randomPointOne.x);
+		float d = -(a * randomPointOne.x + b * randomPointOne.y + c * randomPointOne.z);
+
+		// iterate through points, check if distance is within the threshold, i.e. it is an inlier.
+		// if the number of inliers is larger than the current max -> set as new optimum.
+	    std::unordered_set<int> indexInliersIterationStep;
+		for(int i = 0; i < cloud->size(); i++)
+		{
+			// compute distance of current point
+			pcl::PointXYZ cloudPoint = cloud->points[i];
+			float distance = abs(a * cloudPoint.x + b * cloudPoint.y + c * cloudPoint.z + d) / sqrt(pow(a, 2) + pow(b, 2) + pow(c, 2));
+
+			// keep index if distance is less than threshold; this adds the three random points as well.
+			if(distance < distanceTol)
+			{ 
+				indexInliersIterationStep.insert(i);
+			}
+		}
+
+		// number of indexes is larger then current optimum -> store in global variable
+		if(indexInliersIterationStep.size() > indexInlinersGlobal.size())
+		{
+			indexInlinersGlobal = indexInliersIterationStep;
+		}
+	}
+
+	// return global optimum
+	return indexInlinersGlobal;
+}
+
 std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int maxIterations, float distanceTol)
 {
 	std::unordered_set<int> inliersResult;
@@ -117,16 +183,27 @@ std::unordered_set<int> Ransac(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int ma
 
 int main ()
 {
-
 	// Create viewer
 	pcl::visualization::PCLVisualizer::Ptr viewer = initScene();
 
 	// Create data
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = CreateData();
-	
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+	std::unordered_set<int> inliers;
 
-	// TODO: Change the max iteration and distance tolerance arguments for Ransac function
-	std::unordered_set<int> inliers = Ransac(cloud, 50, 0.5);
+	int selector = 3;
+	switch(selector) 
+	{
+	case 2:
+		cloud = CreateData();
+		inliers = Ransac(cloud, 50, 0.5);
+		break;
+	case 3:
+		cloud = CreateData3D();
+		inliers = Ransac3D(cloud, 50, 0.5);
+		break;
+	default:
+		return 0;
+	}
 
 	pcl::PointCloud<pcl::PointXYZ>::Ptr  cloudInliers(new pcl::PointCloud<pcl::PointXYZ>());
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloudOutliers(new pcl::PointCloud<pcl::PointXYZ>());
