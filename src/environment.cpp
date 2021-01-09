@@ -55,8 +55,8 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     
     std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> result;
 
-	int selector = 1;
-	switch(selector) 
+	int segmentationAlgorithmSelector = 0;
+	switch(segmentationAlgorithmSelector) 
 	{
 	case 0:
         result = processPointClouds->SegmentPlane(cloud, 1000, 0.2);
@@ -67,9 +67,36 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 	default:
 		return;
 	}
-    
-    renderPointCloud(viewer, result.first, "first", Color(0, 255, 0));
-    renderPointCloud(viewer, result.second, "second", Color(255, 0, 0));
+
+    /////////////////////////////////////////////////
+    // Render Segmentation Plane Objects
+
+    // renderPointCloud(viewer, result.first, "first", Color(0, 255, 0));
+    // renderPointCloud(viewer, result.second, "second", Color(255, 0, 0));
+
+    // Render Segmentation Plane Objects
+    /////////////////////////////////////////////////
+
+    /////////////////////////////////////////////////
+    // Cluster Identified Objects
+
+    std::vector<Color> colors = {Color(1,0,0), Color(1,1,0), Color(0,0,1), Color(0,1,0)};
+
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> cloudClusters = processPointClouds->Clustering(result.first, 1, 4, 30);
+    for(int cloudClustersIndex = 0; cloudClustersIndex < cloudClusters.size(); cloudClustersIndex++)
+    {
+
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cluster = cloudClusters[cloudClustersIndex];
+        processPointClouds->numPoints(cluster);
+
+        Color color = colors[cloudClustersIndex % colors.size()];
+        std::string name = "obstCloud" + std::to_string(cloudClustersIndex);
+
+        renderPointCloud(viewer, cluster, name, color);
+    }
+
+    // Cluster Identified Objects
+    /////////////////////////////////////////////////
 }
 
 
