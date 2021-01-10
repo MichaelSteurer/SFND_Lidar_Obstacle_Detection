@@ -27,11 +27,11 @@ struct KdTree
 
 	void insert(std::vector<float> point, int id)
 	{
-		Node **node = findNodeRecursively(&root, point, 0);
+		Node **node = findLeafToInsertRecursively(&root, point, 0);
 		*node = new Node(point, id);
 	}
 
-	Node** findNodeRecursively(Node **node, std::vector<float> point, int depth)
+	Node** findLeafToInsertRecursively(Node **node, std::vector<float> point, int depth)
 	{
 		if (*node == NULL) // termination condition
 		{
@@ -62,7 +62,7 @@ struct KdTree
 					nextNode = &((*node)->left);
 				}
 			}
-			return findNodeRecursively(nextNode, point, depth++);
+			return findLeafToInsertRecursively(nextNode, point, depth + 1);
 		}
 	}
 
