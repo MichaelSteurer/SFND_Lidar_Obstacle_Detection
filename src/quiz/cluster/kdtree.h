@@ -70,19 +70,19 @@ struct KdTree
 	std::vector<int> search(std::vector<float> target, float distanceTol)
 	{
 		std::vector<int> ids;
-		iterateNodesRecursively(&root, target, distanceTol, 0, &ids);
+		findNearbyNodesRecursively(&root, target, distanceTol, 0, &ids);
 		return ids;
 	}
 
-	void iterateNodesRecursively(Node **node, std::vector<float> target, float distanceTol, int depth, std::vector<int> *foundIds)
+	void findNearbyNodesRecursively(Node **node, std::vector<float> target, float distanceTol, int depth, std::vector<int> *foundIds)
 	{		
 		if (*node == NULL) // termination condition
 		{
-			// std::cout << "iterateNodesRecursively: Node is NULL" << std::endl;
+			// std::cout << "findNearbyNodesRecursively: Node is NULL" << std::endl;
 			return;
 		}
 
-		// std::cout << "iterateNodesRecursively: Node " << (*node)->point[0] << "/" << (*node)->point[1] << std::endl;
+		// std::cout << "findNearbyNodesRecursively: Node " << (*node)->point[0] << "/" << (*node)->point[1] << std::endl;
 		int pointIndex;
 		if (depth % 2) // 1, 3, 5, ... check y
 		{
@@ -94,30 +94,26 @@ struct KdTree
 		}
 
 		float distanceLinePoint = (*node)->point[pointIndex] - target[pointIndex];
-		bool lineOutsideBox = abs(distanceLinePoint) > distanceTol;
-
-		if (lineOutsideBox)
-		{
-			if (distanceLinePoint) // point is on the right side if value is positive
-			{
-				iterateNodesRecursively(&((*node)->right), target, distanceTol, depth + 1, foundIds);
-			}
-			else // point is on the left side
-			{
-				iterateNodesRecursively(&((*node)->left), target, distanceTol, depth + 1, foundIds);
-			}
-		}
-		else // line is inside the current point's box
+		bool lineInsideBox = abs(distanceLinePoint) < distanceTol;
+		if (lineInsideBox)
 		{
 			bool pointInsideRadius = isPointInsideRadius(target, (*node)->point, distanceTol);
 			if (pointInsideRadius)
 			{
-				// std::cout << "iterateNodesRecursively: Node is a match " << (*node)->id << std::endl;
 				(*foundIds).push_back((*node)->id);
 			}
+		}
 
-			iterateNodesRecursively(&((*node)->left), target, distanceTol, depth + 1, foundIds);
-			iterateNodesRecursively(&((*node)->right), target, distanceTol, depth + 1, foundIds);
+		float lowerLimitBox = target[pointIndex] - distanceTol;
+		if((*node)->point[pointIndex] > lowerLimitBox)
+		{
+			findNearbyNodesRecursively(&((*node)->left), target, distanceTol, depth + 1, foundIds);
+		}
+
+		float upperLimitBox = target[pointIndex] + distanceTol;
+		if((*node)->point[pointIndex] < upperLimitBox)
+		{
+			findNearbyNodesRecursively(&((*node)->right), target, distanceTol, depth + 1, foundIds);
 		}
 	}
 
