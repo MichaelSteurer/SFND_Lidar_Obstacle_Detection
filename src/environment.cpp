@@ -55,7 +55,7 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
     
     std::pair<pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointCloud<pcl::PointXYZ>::Ptr> result;
 
-	int segmentationAlgorithmSelector = 0;
+	int segmentationAlgorithmSelector = 1;
 	switch(segmentationAlgorithmSelector) 
 	{
 	case 0:
@@ -91,6 +91,9 @@ void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
 
         Color color = colors[cloudClustersIndex % colors.size()];
         std::string name = "obstCloud" + std::to_string(cloudClustersIndex);
+
+        Box box = processPointClouds->BoundingBox(cluster);
+        renderBox(viewer, box, cloudClustersIndex);
 
         renderPointCloud(viewer, cluster, name, color);
     }
