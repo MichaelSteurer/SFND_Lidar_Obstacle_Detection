@@ -1,6 +1,8 @@
 // PCL lib Functions for processing point clouds 
 
 #include "processPointClouds.h"
+#include "kdtree3d.h"
+#include "euclideanCluster.h"
 
 
 //constructor:
@@ -182,6 +184,10 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
 
+    /////////////////////////////////////////////////
+    // Use PCL KdTree Algorithm
+    
+    /*
     // Creating the KdTree object for the search method of the extraction
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud(cloud);
@@ -209,6 +215,31 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
         }
         clusters.push_back(cluster);
     }
+    */    
+
+    // Use PCL KdTree Algorithm
+    /////////////////////////////////////////////////
+    
+
+    /////////////////////////////////////////////////
+    // Use Custom KdTree Algorithm
+
+   	KdTree* tree = new KdTree;
+
+    std::vector<std::vector<float>> points;
+    for(int i = 0; i < cloud->size(); i++)
+    {
+        PointT cloudPoint = cloud->points[i];
+        std::vector<float> p{cloudPoint.x, cloudPoint.y, cloudPoint.z};
+        points.push_back(p);
+    	tree->insert(p, i); 
+    }
+
+    EuclideanClusterCustom* ecc = new EuclideanClusterCustom;
+  	std::vector<std::vector<int>> clustersTemp = ecc->euclideanCluster(points, tree, 3.0);
+
+    // Use Custom KdTree Algorithm
+    /////////////////////////////////////////////////
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
