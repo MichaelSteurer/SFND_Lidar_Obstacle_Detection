@@ -183,16 +183,16 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     auto startTime = std::chrono::steady_clock::now();
 
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
+    std::vector<pcl::PointIndices> clustersIndexes;
 
+    /*     
     /////////////////////////////////////////////////
     // Use PCL KdTree Algorithm
-    
-    /*
     // Creating the KdTree object for the search method of the extraction
+
     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
     tree->setInputCloud(cloud);
 
-    std::vector<pcl::PointIndices> clustersIndexes;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
     ec.setClusterTolerance(clusterTolerance);
     ec.setMinClusterSize(minSize);
@@ -200,10 +200,40 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     ec.setSearchMethod(tree);
     ec.setInputCloud(cloud);
     ec.extract(clustersIndexes);
+    
+    // Use PCL KdTree Algorithm
+    /////////////////////////////////////////////////
+    */
+
+    /////////////////////////////////////////////////
+    // Use Custom KdTree Algorithm
+
+   	KdTree* tree = new KdTree;
+
+    std::vector<std::vector<float>> points;    
+    for(int i = 0; i < cloud->size(); i++)
+    {
+        PointT cloudPoint = cloud->points[i];
+        std::vector<float> p{cloudPoint.x, cloudPoint.y, cloudPoint.z};
+        points.push_back(p);
+    	tree->insert(p, i); 
+    }
+
+    EuclideanClusterCustom* ecc = new EuclideanClusterCustom;
+  	clustersIndexes = ecc->euclideanCluster(points, tree, clusterTolerance);
+
+    // Use Custom KdTree Algorithm
+    /////////////////////////////////////////////////
 
     for(int clusterIndexesIndex = 0; clusterIndexesIndex < clustersIndexes.size(); clusterIndexesIndex++) 
     {
         pcl::Indices clusterIndexes = clustersIndexes[clusterIndexesIndex].indices;
+        
+        // apply size limits
+        if (clusterIndexes.size() > maxSize || clusterIndexes.size() < minSize)
+        {
+            continue;
+        }
 
         pcl::PointCloud<pcl::PointXYZ>::Ptr cluster(new pcl::PointCloud<pcl::PointXYZ>());
         // std::cout << "Cluster Index " << clusterIndexes.size() << std::endl;
@@ -215,31 +245,6 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
         }
         clusters.push_back(cluster);
     }
-    */    
-
-    // Use PCL KdTree Algorithm
-    /////////////////////////////////////////////////
-    
-
-    /////////////////////////////////////////////////
-    // Use Custom KdTree Algorithm
-
-   	KdTree* tree = new KdTree;
-
-    std::vector<std::vector<float>> points;
-    for(int i = 0; i < cloud->size(); i++)
-    {
-        PointT cloudPoint = cloud->points[i];
-        std::vector<float> p{cloudPoint.x, cloudPoint.y, cloudPoint.z};
-        points.push_back(p);
-    	tree->insert(p, i); 
-    }
-
-    EuclideanClusterCustom* ecc = new EuclideanClusterCustom;
-  	std::vector<std::vector<int>> clustersTemp = ecc->euclideanCluster(points, tree, 3.0);
-
-    // Use Custom KdTree Algorithm
-    /////////////////////////////////////////////////
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);

@@ -31,9 +31,9 @@ struct EuclideanClusterCustom
         }
     }
 
-    std::vector<std::vector<int>> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
+    std::vector<pcl::PointIndices> euclideanCluster(const std::vector<std::vector<float>>& points, KdTree* tree, float distanceTol)
     {
-        std::vector<std::vector<int>> clusters;
+        std::vector<pcl::PointIndices> clusters;
 
         std::vector<int> processedPointIndexes;
         for(int pointsIndex = 0; pointsIndex < points.size(); pointsIndex++) 
@@ -49,7 +49,7 @@ struct EuclideanClusterCustom
 
                 std::vector<float> point = points[pointsIndex];
                 proximity(points, pointsIndex, tree, distanceTol, cluster, &processedPointIndexes);
-                clusters.push_back(cluster->indices);
+                clusters.push_back(*cluster);
             }
         }
         return clusters;
