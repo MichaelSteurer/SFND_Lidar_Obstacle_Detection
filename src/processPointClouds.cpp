@@ -25,21 +25,41 @@ void ProcessPointClouds<PointT>::numPoints(typename pcl::PointCloud<PointT>::Ptr
 template<typename PointT>
 typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(typename pcl::PointCloud<PointT>::Ptr cloud, float filterRes, Eigen::Vector4f minPoint, Eigen::Vector4f maxPoint)
 {
+    /////////////////////////////////////////////////
+    // Voxel grid filter
+
     auto startTime = std::chrono::steady_clock::now();
 
-    typename pcl::PointCloud<PointT>::Ptr cloudFiltered (new pcl::PointCloud<PointT>);
+    typename pcl::PointCloud<PointT>::Ptr cloudFilteredGrid(new pcl::PointCloud<PointT>);
 
-    pcl::VoxelGrid<PointT> sor;
-    sor.setInputCloud(cloud);
-    sor.setLeafSize(filterRes, filterRes, filterRes);
-    sor.filter(*cloudFiltered);
+    pcl::VoxelGrid<PointT> filterGrid;
+    filterGrid.setInputCloud(cloud);
+    filterGrid.setLeafSize(filterRes, filterRes, filterRes);
+    filterGrid.filter(*cloudFilteredGrid);
 
     auto endTime = std::chrono::steady_clock::now();
     auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "grid filter took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloudFiltered;
 
+    /////////////////////////////////////////////////
+    // Region filter
+
+    startTime = std::chrono::steady_clock::now();
+
+    typename pcl::PointCloud<PointT>::Ptr cloudFilteredGridRegion(new pcl::PointCloud<PointT>);
+
+    pcl::CropBox<PointT> filterRegion(true);
+    filterRegion.setInputCloud(cloudFilteredGrid);
+    filterRegion.setMin(minPoint);
+    filterRegion.setMax(maxPoint);
+    filterRegion.filter(*cloudFilteredGridRegion);
+        
+    endTime = std::chrono::steady_clock::now();
+    elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "region filter took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+    return cloudFilteredGridRegion;
 }
 
 
