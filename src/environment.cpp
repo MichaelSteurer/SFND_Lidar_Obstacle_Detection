@@ -46,8 +46,8 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
     pcl::PointCloud<pcl::PointXYZI>::Ptr filteredCloud;
 
     float resolution = 0.1;
-    Eigen::Vector4f minPoint = Eigen::Vector4f (-5, -5, -2, 1);
-    Eigen::Vector4f maxPoint = Eigen::Vector4f (16, 7, 3, 1);
+    Eigen::Vector4f minPoint = Eigen::Vector4f (-10, -5, -2, 1);
+    Eigen::Vector4f maxPoint = Eigen::Vector4f (25, 7, 3, 1);
 
     filteredCloud = pointProcessorI->FilterCloud(inputCloud, resolution, minPoint, maxPoint);
 
