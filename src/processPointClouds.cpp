@@ -107,10 +107,10 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 template<typename PointT>
 std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
 {
-    pcl::PointCloud<pcl::PointXYZ> *cloud_f = new pcl::PointCloud<pcl::PointXYZ>();
-    pcl::PointCloud<pcl::PointXYZ> *cloud_p = new pcl::PointCloud<pcl::PointXYZ>();
+    pcl::PointCloud<PointT> *cloud_f = new pcl::PointCloud<PointT>();
+    pcl::PointCloud<PointT> *cloud_p = new pcl::PointCloud<PointT>();
 
-    pcl::ExtractIndices<pcl::PointXYZ> extract;
+    pcl::ExtractIndices<PointT> extract;
 
     // Extract the inliers
     extract.setInputCloud(cloud);
@@ -249,15 +249,15 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
     std::vector<pcl::PointIndices> clustersIndexes;
 
-    /*     
+    /*
     /////////////////////////////////////////////////
     // Use PCL KdTree Algorithm
     // Creating the KdTree object for the search method of the extraction
 
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>);
+    typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>);
     tree->setInputCloud(cloud);
 
-    pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
+    pcl::EuclideanClusterExtraction<PointT> ec;
     ec.setClusterTolerance(clusterTolerance);
     ec.setMinClusterSize(minSize);
     ec.setMaxClusterSize(maxSize);
@@ -299,7 +299,7 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
             continue;
         }
 
-        pcl::PointCloud<pcl::PointXYZ>::Ptr cluster(new pcl::PointCloud<pcl::PointXYZ>());
+        typename pcl::PointCloud<PointT>::Ptr cluster(new pcl::PointCloud<PointT>());
         // std::cout << "Cluster Index " << clusterIndexes.size() << std::endl;
         for(int clusterIndexesIndex = 0; clusterIndexesIndex < clusterIndexes.size(); clusterIndexesIndex++) 
         {
