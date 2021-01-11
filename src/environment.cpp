@@ -40,7 +40,7 @@ void cityBlockStream(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPoin
 
     float resolution = 0.3;
     Eigen::Vector4f minPoint = Eigen::Vector4f (-10, -5, -2, 1);
-    Eigen::Vector4f maxPoint = Eigen::Vector4f (30, 8, 3, 1);
+    Eigen::Vector4f maxPoint = Eigen::Vector4f (30, 7, 3, 1);
 
     filteredCloud = pointProcessorI->FilterCloud(inputCloud, resolution, minPoint, maxPoint);
 
@@ -59,7 +59,6 @@ void cityBlockStream(pcl::visualization::PCLVisualizer::Ptr& viewer, ProcessPoin
     for(int cloudClustersIndex = 0; cloudClustersIndex < cloudClusters.size(); cloudClustersIndex++)
     {
         pcl::PointCloud<pcl::PointXYZI>::Ptr cluster = cloudClusters[cloudClustersIndex];
-        processPointClouds->numPoints(cluster);
 
         Color color = colors[cloudClustersIndex % colors.size()];
         std::string name = "obstCloud" + std::to_string(cloudClustersIndex);
