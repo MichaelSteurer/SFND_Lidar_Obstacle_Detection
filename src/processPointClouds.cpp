@@ -54,12 +54,53 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
     filterRegion.setMin(minPoint);
     filterRegion.setMax(maxPoint);
     filterRegion.filter(*cloudFilteredGridRegion);
-        
+
     endTime = std::chrono::steady_clock::now();
     elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
     std::cout << "region filter took " << elapsedTime.count() << " milliseconds" << std::endl;
 
-    return cloudFilteredGridRegion;
+
+    /////////////////////////////////////////////////
+    // Vehicle filter
+
+    startTime = std::chrono::steady_clock::now();
+
+    typename pcl::PointCloud<PointT>::Ptr cloudFilteredGridRegionRoof(new pcl::PointCloud<PointT>);
+
+    std::vector<int> roofTopIndexes;
+
+    // filter roof indexes
+    pcl::CropBox<PointT> filterVehicle(true);
+    filterVehicle.setInputCloud(cloudFilteredGridRegion);
+
+    Eigen::Vector4f minCarPoint = Eigen::Vector4f (-1.5, -1.7, -1, 1);
+    filterVehicle.setMin(minCarPoint);
+
+    Eigen::Vector4f maxCarPoint = Eigen::Vector4f (2.6, 1.7, -0.4, 1);
+    filterVehicle.setMax(maxCarPoint);
+    filterVehicle.filter(roofTopIndexes);
+
+    // remove these indexes from the already filtered cloud
+    pcl::PointIndices::Ptr roofTopIndexesPcl(new pcl::PointIndices);
+    for(int i = 0; i < roofTopIndexes.size(); i++)
+    {
+        int roofTopIndex = roofTopIndexes[i];
+        roofTopIndexesPcl->indices.push_back(roofTopIndex);
+    }
+
+    pcl::ExtractIndices<PointT> extract;
+    extract.setInputCloud(cloudFilteredGridRegion);
+    extract.setIndices(roofTopIndexesPcl);
+    extract.setNegative(true);
+    extract.filter(*cloudFilteredGridRegionRoof);
+
+    endTime = std::chrono::steady_clock::now();
+    elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+    std::cout << "roof filter took " << elapsedTime.count() << " milliseconds" << std::endl;
+
+
+    // return result of grid-, region- and roof filter
+    return cloudFilteredGridRegionRoof;
 }
 
 

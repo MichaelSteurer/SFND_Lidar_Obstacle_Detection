@@ -43,15 +43,15 @@ void cityBlock(pcl::visualization::PCLVisualizer::Ptr& viewer)
     ProcessPointClouds<pcl::PointXYZI>* pointProcessorI = new ProcessPointClouds<pcl::PointXYZI>();
     pcl::PointCloud<pcl::PointXYZI>::Ptr inputCloud = pointProcessorI->loadPcd("../src/sensors/data/pcd/data_1/0000000000.pcd");
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr filterCloud;
+    pcl::PointCloud<pcl::PointXYZI>::Ptr filteredCloud;
 
     float resolution = 0.1;
     Eigen::Vector4f minPoint = Eigen::Vector4f (-5, -5, -2, 1);
     Eigen::Vector4f maxPoint = Eigen::Vector4f (16, 7, 3, 1);
 
-    filterCloud = pointProcessorI->FilterCloud(inputCloud, resolution, minPoint, maxPoint);
+    filteredCloud = pointProcessorI->FilterCloud(inputCloud, resolution, minPoint, maxPoint);
 
-    renderPointCloud(viewer, filterCloud, "filterCloud");
+    renderPointCloud(viewer, filteredCloud, "filterCloud");
 }
 
 void simpleHighway(pcl::visualization::PCLVisualizer::Ptr& viewer)
