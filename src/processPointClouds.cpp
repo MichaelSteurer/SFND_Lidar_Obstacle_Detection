@@ -249,25 +249,23 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
     std::vector<typename pcl::PointCloud<PointT>::Ptr> clusters;
     std::vector<pcl::PointIndices> clustersIndexes;
 
-    /*
-    /////////////////////////////////////////////////
-    // Use PCL KdTree Algorithm
-    // Creating the KdTree object for the search method of the extraction
-
-    typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>);
-    tree->setInputCloud(cloud);
-
-    pcl::EuclideanClusterExtraction<PointT> ec;
-    ec.setClusterTolerance(clusterTolerance);
-    ec.setMinClusterSize(minSize);
-    ec.setMaxClusterSize(maxSize);
-    ec.setSearchMethod(tree);
-    ec.setInputCloud(cloud);
-    ec.extract(clustersIndexes);
-    
-    // Use PCL KdTree Algorithm
-    /////////////////////////////////////////////////
-    */
+    ///////////////////////////////////////////////////
+    //// Use PCL KdTree Algorithm
+    //// Creating the KdTree object for the search method of the extraction
+    //
+    //typename pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>);
+    //tree->setInputCloud(cloud);
+    //
+    //pcl::EuclideanClusterExtraction<PointT> ec;
+    //ec.setClusterTolerance(clusterTolerance);
+    //ec.setMinClusterSize(minSize);
+    //ec.setMaxClusterSize(maxSize);
+    //ec.setSearchMethod(tree);
+    //ec.setInputCloud(cloud);
+    //ec.extract(clustersIndexes);
+    //
+    //// Use PCL KdTree Algorithm
+    ///////////////////////////////////////////////////
 
     /////////////////////////////////////////////////
     // Use Custom KdTree Algorithm
