@@ -107,8 +107,12 @@ typename pcl::PointCloud<PointT>::Ptr ProcessPointClouds<PointT>::FilterCloud(ty
 template<typename PointT>
 std::pair<typename pcl::PointCloud<PointT>::Ptr, typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::SeparateClouds(pcl::PointIndices::Ptr inliers, typename pcl::PointCloud<PointT>::Ptr cloud) 
 {
-    pcl::PointCloud<PointT> *cloud_f = new pcl::PointCloud<PointT>();
-    pcl::PointCloud<PointT> *cloud_p = new pcl::PointCloud<PointT>();
+    // pcl::PointCloud<PointT> *cloud_f = new pcl::PointCloud<PointT>();
+    // pcl::PointCloud<PointT> *cloud_p = new pcl::PointCloud<PointT>();
+
+    typename pcl::PointCloud<PointT>::Ptr cloud_f(new pcl::PointCloud<PointT>());
+    typename pcl::PointCloud<PointT>::Ptr cloud_p(new pcl::PointCloud<PointT>());
+
 
     pcl::ExtractIndices<PointT> extract;
 
