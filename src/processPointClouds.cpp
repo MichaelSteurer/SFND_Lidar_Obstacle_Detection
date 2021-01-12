@@ -289,19 +289,19 @@ std::vector<typename pcl::PointCloud<PointT>::Ptr> ProcessPointClouds<PointT>::C
 
     for(int clusterIndexesIndex = 0; clusterIndexesIndex < clustersIndexes.size(); clusterIndexesIndex++) 
     {
-        pcl::Indices clusterIndexes = clustersIndexes[clusterIndexesIndex].indices;
+        pcl::PointIndices clusterIndexes = clustersIndexes[clusterIndexesIndex];
         
         // apply size limits
-        if (clusterIndexes.size() > maxSize || clusterIndexes.size() < minSize)
+        if (clusterIndexes.indices.size() > maxSize || clusterIndexes.indices.size() < minSize)
         {
             continue;
         }
 
         typename pcl::PointCloud<PointT>::Ptr cluster(new pcl::PointCloud<PointT>());
         // std::cout << "Cluster Index " << clusterIndexes.size() << std::endl;
-        for(int clusterIndexesIndex = 0; clusterIndexesIndex < clusterIndexes.size(); clusterIndexesIndex++) 
+        for(int clusterIndexesIndex = 0; clusterIndexesIndex < clusterIndexes.indices.size(); clusterIndexesIndex++) 
         {
-            int clusterIndex = clusterIndexes[clusterIndexesIndex];
+            int clusterIndex = clusterIndexes.indices[clusterIndexesIndex];
             // std::cout << "  Index " << clusterIndex << std::endl;
             cluster->push_back(cloud->points[clusterIndex]);
         }
